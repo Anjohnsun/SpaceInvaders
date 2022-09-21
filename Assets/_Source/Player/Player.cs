@@ -13,10 +13,12 @@ public class Player : MonoBehaviour
 
     private PlayerMovement _playerMovement;
     private PlayerCombat _playerCombat;
+    [SerializeField] float _leftBorder;
+    [SerializeField] float _rightBorder;
 
     private void Start()
     {
-        _playerMovement = new PlayerMovement();
+        _playerMovement = new PlayerMovement(_leftBorder, _rightBorder);
         _playerCombat = new PlayerCombat(_bulletPrefab, _shootingPoint);
 
         StartCoroutine(Shoot());
@@ -30,7 +32,6 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(_shootingDelay);
         _playerCombat.Shoot();
-        Debug.Log("Shoot!");
         yield return StartCoroutine(Shoot());
     }
 }
