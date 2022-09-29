@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class EnemyArmy : MonoBehaviour
 {
-    [Range(1, 9)]
-    [SerializeField] private int _columns;
-    [Range(1, 50)]
-    [SerializeField] private int _enemyNumber;
-    private int[] rows;
+    [Range(7, 11)]
+    [SerializeField] private int _enemyColumns;
+    [Range(2, 25)]
+    [SerializeField] private int _enemyRows;
 
-    [SerializeField] private List<EnemySO> EnemyTypes = new List<EnemySO>();
+    public static List<Sprite> EnemySprites;
+    [SerializeField] private List<Sprite> SpritesForEnemies;
     [SerializeField] private GameObject ArmyRow;
     [SerializeField] private GameObject EmptyEnemyPrefab;
     [SerializeField] private GameObject LeftPointer;
@@ -20,14 +20,27 @@ public class EnemyArmy : MonoBehaviour
     [SerializeField] private float _speed;
     [SerializeField] private float _verticalSpeed;
 
+    [SerializeField] private WinPanel winPanel;
+
+    public static int _alive = 0;
+    [SerializeField] public int Score
+    {
+        get => Score;
+        set
+        {
+            Score += value;
+        }
+    }
+
 
     private void Start()
     {
         InitArmy();
+        EnemySprites = SpritesForEnemies;
     }
     private void InitArmy()
     {
-        for (int i = 0; i < _enemyNumber / _columns + 1; i++)
+        for (int i = 0; i < _enemyRows + 1; i++)
         {
             Instantiate(ArmyRow, transform);
         }
@@ -37,43 +50,43 @@ public class EnemyArmy : MonoBehaviour
 
     private IEnumerator CreateArmy()
     {
-        int enemiesCreated = 0;
-
         yield return new WaitForSeconds(0.5f);
 
         for (int i = 0; i < 2; i++)
         {
-            transform.GetChild(i).position = new Vector2(transform.GetChild(i).position.x,
+            transform.GetChild(i).position = new Vector2(8,
                 transform.GetChild(i).position.y + 1.45f * i);
-            for (int j = 0; j < _columns; j++)
+            for (int j = 0; j < _enemyColumns; j++)
             {
                 yield return new WaitForSeconds(0.2f);
-                if (enemiesCreated < _enemyNumber)
                 {
-                    Instantiate(EmptyEnemyPrefab, new Vector2(8.5f - 1.7f * j, transform.GetChild(i).position.y),
+                    Instantiate(EmptyEnemyPrefab, new Vector2(8f - 1.5f * j, transform.GetChild(i).position.y),
                         new Quaternion(), transform.GetChild(i));
-                    enemiesCreated++;
+
+                    //Подставление СО 
                 }
             }
         }
-        for (int i = 2; i < _enemyNumber / _columns + 1; i++)
+        for (int i = 2; i < _enemyRows; i++)
         {
-            transform.GetChild(i).position = new Vector2(transform.GetChild(i).position.x,
+            transform.GetChild(i).position = new Vector2(8,
                 transform.GetChild(i).position.y + 1.45f * i);
-            for (int j = 0; j < _columns; j++)
+            for (int j = 0; j < _enemyColumns; j++)
             {
-                if (enemiesCreated < _enemyNumber)
                 {
-                    Instantiate(EmptyEnemyPrefab, new Vector2(8.5f - 1.7f * j, transform.GetChild(i).position.y),
+                    Instantiate(EmptyEnemyPrefab, new Vector2(8f - 1.5f * j, transform.GetChild(i).position.y),
                         new Quaternion(), transform.GetChild(i));
-                    enemiesCreated++;
+
+                    //Подставление СО 
                 }
             }
         }
+
+        _alive = _enemyColumns * _enemyRows;
 
 
         LeftPointer = Instantiate(new GameObject(), transform);
-        LeftPointer.transform.position = new Vector2(transform.GetChild(0).GetChild(transform.GetChild(2).childCount-1)
+        LeftPointer.transform.position = new Vector2(transform.GetChild(0).GetChild(transform.GetChild(2).childCount - 1)
             .transform.position.x, 10);
         RightPointer = Instantiate(new GameObject(), transform);
         RightPointer.transform.position = new Vector2(transform.GetChild(0).GetChild(0)
@@ -84,21 +97,34 @@ public class EnemyArmy : MonoBehaviour
 
     private IEnumerator Move()
     {
-        while (LeftPointer.transform.position.x > -9)
+        while (LeftPointer.transform.position.x > -8)
         {
             yield return new WaitForSeconds(0.6f);
-            transform.position = new Vector2(transform.position.x-1, transform.position.y);
+            transform.position = new Vector2(transform.position.x - 1, transform.position.y);
+            if (_alive <= 0)
+            {
+                winPanel.gameObject.SetActive(true);
+            }
         }
         yield return new WaitForSeconds(0.6f);
-        transform.position = new Vector2(transform.position.x, transform.position.y-0.6f);
-        while (RightPointer.transform.position.x <  9)
+        transform.position = new Vector2(transform.position.x, transform.position.y - 0.6f);
+        while (RightPointer.transform.position.x < 8)
         {
             yield return new WaitForSeconds(0.6f);
             transform.position = new Vector2(transform.position.x + 1, transform.position.y);
+            if (_alive <= 0)
+            {
+                winPanel.gameObject.SetActive(true);
+            }
         }
         yield return new WaitForSeconds(0.6f);
         transform.position = new Vector2(transform.position.x, transform.position.y - 0.6f);
 
         yield return StartCoroutine(Move());
+    }
+
+    public static void IncreaseKilledEnemies()
+    {
+        _alive--;
     }
 }

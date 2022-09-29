@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class DeadLine : MonoBehaviour
 {
+    [SerializeField] private LosePanel losePanel;
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("Enemy wins!");
+        losePanel.gameObject.SetActive(true);
     }
 }

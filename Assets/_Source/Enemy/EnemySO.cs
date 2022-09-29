@@ -7,4 +7,5 @@ public class EnemySO : ScriptableObject
 {
     public int _hp;
     public Sprite _enemySprite;
+    public int _givesScore;
 }

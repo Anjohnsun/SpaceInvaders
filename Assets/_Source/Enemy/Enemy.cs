@@ -5,16 +5,33 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private int hp;
-    [SerializeField] private SpriteRenderer sprite;
+    [SerializeField] private SpriteRenderer spriteR;
+    [SerializeField] private int givesScore;
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         hp--;
-        if (hp <= 0) Destroy(gameObject);
+        if (hp <= 0)
+        {
+            Score.IncreaseScore(givesScore);
+            EnemyArmy.IncreaseKilledEnemies();
+            Destroy(gameObject);
+        }
     }
-    public void InitializeEnemy(EnemySO enSO)
+    private void InitializeEnemy(Sprite Sprite)
     {
-        sprite.sprite = enSO._enemySprite;
-        hp = enSO._hp;
+        spriteR.sprite = Sprite;
+        hp = Random.Range(0, 2);
+        givesScore = Random.Range(0,5);
     }
+
+    void OnBecameVisible()
+    {
+        InitializeEnemy(EnemyArmy.EnemySprites[Random.Range(0, 3)]);
+        Debug.Log("Working!");
+    }
+
+    
 }
+
